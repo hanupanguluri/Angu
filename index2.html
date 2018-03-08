@@ -4,63 +4,133 @@
 		<title></title>
 	</head>
 	<body>
-		<div ng-app="myApp">
-			<header>
-				This is a header
-				
-			</header>
-			<nav>
-				<a ng-href="#/home">Home</a>
-				<a ng-href="#/about">About</a>
-				<a ng-href="#/contact">Contact</a>
-			</nav>
-			<ng-view></ng-view>
-			<footer>This is a footer</footer>
+		<div ng-app="app">
+			<div ng-controller="FirstCtrl">
+				<div>
+					Enter a name : <input type="text" ng-model="name">
+					Enter age : <input type="number" ng-model="age">
+					<button ng-click="addItem()">add Item</button>
+				</div>
+				<table border="1px">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Age</th>
+							<th>ID</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-show="!!item.id" ng-repeat="item in message track by $index" >
+							<td ng-hide="item.edit">{{item.name}}</td>
+							<td ng-hide="item.edit">{{item.age}}</td>
+							<td ng-hide="item.edit">{{item.id}}</td>
+							<td ng-hide="item.edit"><button ng-click="removeItem(item.id)">remove item</button></td>
+							<td ng-hide="item.edit"><button ng-click="editItem(item)">edit item</button></td>
+							<td ng-show="item.edit"><input ng-model="item.changedName" type="text"></td>
+							<td ng-show="item.edit"><input ng-model="item.changedAge" ></td>
+							<td ng-show="item.edit">{{item.id}}</td>
+							<td ng-show="item.edit"><button ng-click="dontUpdate(item)">dont update </button></td>
+							<td ng-show="item.edit"><button ng-click="updateItem(item)">update item</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-route.min.js"></script>
-		<script>
-			// we have injected ngRoute into our application
-			angular.module('myApp', ['ngRoute']);
-			angular.module('myApp')
-				// config we can configure the provider
-				// $routeProvider -- in single page application configuration
-				.config(['$routeProvider',function($routeProvider) {
-					$routeProvider
-						// using .when method we registered a new route
-						// /home we configured a specific template
-						.when('/home', {
-							controller : 'HomeCtrl',
-							template : '<h1>{{title}}</h1><p>{{message}}</p>'
-						})
-						.when('/about', {
-							controller : 'AboutCtrl',
-							template : '<h1>{{title}}</h1><p>{{message}}</p>'
-						})
-						.when('/contact', {
-							controller : 'ContactCtrl',
-							template : '<h1>{{title}}</h1><p>{{message}}</p>'
-						})
-						// if no other route is loaded load the /home route
-						.otherwise({
-							redirectTo : '/home'
-						})
-				}]); 
-			angular.module('myApp')
-				.controller('HomeCtrl', ['$scope', function($scope){
-					$scope.title = "HomeCtrl"; 
-					$scope.message = 'this is a home route'
-				}])
-			angular.module('myApp')
-				.controller('AboutCtrl', ['$scope', function($scope){
-					$scope.title = "AboutCtrl"; 
-					$scope.message = 'this is a about route'
-				}])
-			angular.module('myApp')
-				.controller('ContactCtrl', ['$scope', function($scope){
-					$scope.title = "ContactCtrl"; 
-					$scope.message = 'this is a contact route'
-				}])
+		<script> 
+		angular.module('app', []);
+		angular.module('app')
+			.controller('FirstCtrl', ['$scope', '$http',function($scope, $http){
+				$scope.message = [];
+				$scope.checkForObject = function(item) {
+					if(Array.isArray(item) || (typeof item !=='object')) return false;
+					else true;
+				}
+				
+				function getData() {
+					$http({
+						url : 'http://rest.learncode.academy/api/johnbob/friends/', 
+						method : 'GET'
+					}).success(function(data) {
+						
+						$scope.message = data;
+						console.log('success', data)
+					}).error(function(err){	
+						console.log('error', err)
+					})
+				}
+				
+				getData();
+
+				
+				$scope.removeItem = function(id) {
+				
+					$http({
+						url : 'http://rest.learncode.academy/api/johnbob/friends/'+id,
+						method : 'DELETE'
+					}).success(function(data){
+						
+						getData();
+					}).error(function(err){
+						alert('we got an error in removeItem');
+					})
+				}
+				$scope.addItem = function() {
+					var name = $scope.name;
+					var age = $scope.age;
+					$scope.name = '';
+					$scope.age = '';
+					var infoToSend = {
+						name : name, 
+						age : age
+					}
+					 
+					$http({
+						url : 'http://rest.learncode.academy/api/johnbob/friends/', 
+						method : 'POST', 
+						data : infoToSend
+					}).success(function(data){
+						
+						console.log('success', data)
+						getData();
+					}).error(function(err){
+						alert('we got an error in addItem');
+					})
+				}
+				
+				$scope.editItem = function(item){
+					
+					item.edit = true;
+					item.changedName = item.name;
+					
+					item.changedAge = item.age;
+				}
+				$scope.dontUpdate = function(item){
+					
+					item.edit = false;
+				}
+				$scope.updateItem = function(item) {
+					
+					var changedName = item.changedName;
+					var changedAge = item.changedAge;
+					
+					var infoToSend = {
+						name : changedName,
+						age : changedAge
+					}
+					console.log(infoToSend);
+					
+					$http({
+						url : 'http://rest.learncode.academy/api/johnbob/friends/'+item.id, 
+						method : 'PUT', 
+						data : infoToSend
+					}).success(function(data){
+					
+						console.log('success', data)
+						getData();
+					})
+				}
+			}])
 		</script>
 	</body>
 </html>
