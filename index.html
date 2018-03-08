@@ -1,0 +1,63 @@
+
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+		<div ng-app="myApp">
+			<header>
+				This is a header
+				
+			</header>
+			<nav>
+				<a ng-href="#/home">Home</a>
+				<a ng-href="#/about">About</a>
+				<a ng-href="#/contact">Contact</a>
+			</nav>
+			<ng-view></ng-view>
+			<footer>This is a footer</footer>
+		</div>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-route.min.js"></script>
+		<script>
+			angular.module('myApp', ['ngRoute']);
+			angular.module('myApp')
+				
+				.config(['$routeProvider',function($routeProvider) {
+					$routeProvider
+						
+						.when('/home', {
+							controller : 'HomeCtrl',
+							template : '<h3>{{title}}</h3><p>{{message}}</p>'
+						})
+						.when('/about', {
+							controller : 'AboutCtrl',
+							template : '<h3>{{title}}</h3><p>{{message}}</p>'
+						})
+						.when('/contact', {
+							controller : 'ContactCtrl',
+							template : '<h3>{{title}}</h3><p>{{message}}</p>'
+						})
+						
+						.otherwise({
+							redirectTo : '/home'
+						})
+				}]); 
+			angular.module('myApp')
+				.controller('HomeCtrl', ['$scope', function($scope){
+					$scope.title = "HomeCtrl"; 
+					$scope.message = 'UI developer'
+				}])
+			angular.module('myApp')
+				.controller('AboutCtrl', ['$scope', function($scope){
+					$scope.title = "AboutCtrl"; 
+					$scope.message = 'About us'
+				}])
+			angular.module('myApp')
+				.controller('ContactCtrl', ['$scope', function($scope){
+					$scope.title = "ContactCtrl"; 
+					$scope.message = ' contact name'
+				}])
+		</script>
+	</body>
+</html>
